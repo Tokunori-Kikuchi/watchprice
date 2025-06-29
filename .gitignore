@@ -1,0 +1,12 @@
+# macOS system files
+.DS_Store
+
+# Python build artifacts
+__pycache__/
+*.pyc
+
+# Webdriver-manager temporary folders on macOS
+Formulae/
+Searching/
+
+# Debug files from our scraper
