@@ -1,3 +1,6 @@
-2025/06/29-21:51:01.900 19e91f7 Reusing MANIFEST /Users/tokunori/practice/watchprice/ebay_browser_profile/Default/Session Storage/MANIFEST-000001
-2025/06/29-21:51:01.901 19e91f7 Recovering log #3
-2025/06/29-21:51:01.901 19e91f7 Reusing old log /Users/tokunori/practice/watchprice/ebay_browser_profile/Default/Session Storage/000003.log 
+2025/07/02-01:44:27.441 1d5974b Reusing MANIFEST /Users/tokunori/practice/watchprice/ebay_browser_profile/Default/Session Storage/MANIFEST-000001
+2025/07/02-01:44:27.441 1d5974b Recovering log #4
+2025/07/02-01:44:27.442 1d5974b Reusing old log /Users/tokunori/practice/watchprice/ebay_browser_profile/Default/Session Storage/000004.log 
+2025/07/02-01:44:29.051 1d5974d Level-0 table #7: started
+2025/07/02-01:44:29.059 1d5974d Level-0 table #7: 12716 bytes OK
+2025/07/02-01:44:29.070 1d5974d Delete type=0 #4

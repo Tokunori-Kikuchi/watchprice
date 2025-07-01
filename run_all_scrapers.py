@@ -6,10 +6,10 @@ from datetime import datetime
 import requests
 
 # --- 各スクレイパーをインポート ---
-from chrono24_scraper import scrape_chrono24_submariner
+from chrono24_scraper import scrape_chrono24_submariner, scrape_chrono24_all_brands
 from ebay_scraper import scrape_ebay
 from tokemar_scraper import scrape_tokemar
-from allu_scraper import scrape_allu # ALLUを追加
+# from allu_scraper import scrape_allu # ALLUを除外
 
 def main():
     print(f"--- 全スクレイピング処理を開始します --- [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]")
@@ -47,14 +47,14 @@ def main():
         print(f"❌ トケマーのスクレイピング中にエラー: {e}")
 
     # --- 4. ALLU ---
-    try:
-        print("\n[4/4] ALLUのスクレイピングを実行中...")
-        allu_products = scrape_allu(search_query="ロレックス サブマリーナ", max_pages=1)
-        if allu_products:
-            all_results.extend(allu_products)
-            print(f"✅ ALLUから {len(allu_products)} 件のデータを取得しました。")
-    except Exception as e:
-        print(f"❌ ALLUのスクレイピング中にエラー: {e}")
+    # try:
+    #     print("\n[4/4] ALLUのスクレイピングを実行中...")
+    #     allu_products = scrape_allu(search_query="ロレックス サブマリーナ", max_pages=1)
+    #     if allu_products:
+    #         all_results.extend(allu_products)
+    #         print(f"✅ ALLUから {len(allu_products)} 件のデータを取得しました。")
+    # except Exception as e:
+    #     print(f"❌ ALLUのスクレイピング中にエラー: {e}")
 
     # --- 5. 統合結果をサーバーに送信 ---
     if all_results:

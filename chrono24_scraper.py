@@ -126,12 +126,109 @@ def scrape_chrono24_submariner(max_pages=2):
             browser.close()
             return None
 
+# --- 追加: 全ブランド取得用関数 ---
+def get_all_brands(page):
+    """クロノ24のブランド一覧ページから全ブランド名とURLを取得"""
+    brands_url = "https://www.chrono24.jp/"
+    print(f"ブランド一覧ページにアクセス: {brands_url}")
+    page.goto(brands_url, wait_until='domcontentloaded', timeout=60000)
+    # ブランド一覧のリンクを取得（サイドバーやブランド一覧のaタグ）
+    # 例: <a href="/rolex/index.htm">Rolex</a>
+    brand_links = page.query_selector_all('a[href*="/index.htm"]')
+    brands = []
+    for link in brand_links:
+        href = link.get_attribute('href')
+        name = link.inner_text().strip()
+        # ブランド名が空や重複を除外
+        if href and name and href.startswith('/') and name:
+            brands.append({
+                'name': name,
+                'url': f"https://www.chrono24.jp{href}" if href.startswith('/') else href
+            })
+    # 重複除去
+    seen = set()
+    unique_brands = []
+    for b in brands:
+        if b['url'] not in seen:
+            unique_brands.append(b)
+            seen.add(b['url'])
+    print(f"取得ブランド数: {len(unique_brands)}")
+    return unique_brands
+
+
+def scrape_chrono24_all_brands(max_pages_per_brand=2):
+    """全ブランド・全モデルの商品を取得する"""
+    all_products = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+            viewport={'width': 1920, 'height': 1080},
+            locale='ja-JP'
+        )
+        load_cookies(context, COOKIE_FILE)
+        page = context.new_page()
+        brands = get_all_brands(page)
+        for idx, brand in enumerate(brands):
+            print(f"\n[{idx+1}/{len(brands)}] {brand['name']} の商品を取得中...")
+            try:
+                # ブランドトップページから商品一覧ページへ（多くは /brand/index.htm → /brand/--mod1.htm）
+                # 例: https://www.chrono24.jp/rolex/index.htm → https://www.chrono24.jp/rolex/index.htm?page=1
+                base_url = brand['url']
+                page.goto(base_url, wait_until='domcontentloaded', timeout=60000)
+                # 商品数・ページ数を取得
+                main_content_selector = "div.sorting-wrapper"
+                try:
+                    page.wait_for_selector(main_content_selector, state='visible', timeout=20000)
+                except Exception:
+                    print(f"{brand['name']} の商品リストが見つかりません。スキップします。")
+                    continue
+                html_content = page.content()
+                soup = BeautifulSoup(html_content, 'html.parser')
+                result_count_element = soup.select_one("div.catalog-products-result-count > div.text-bold")
+                if not result_count_element:
+                    print(f"{brand['name']} の総アイテム数が取得できません。スキップします。")
+                    continue
+                result_count_text = result_count_element.get_text(strip=True)
+                total_items_match = re.search(r'[\d,]+', result_count_text)
+                total_items = int(total_items_match.group().replace(',', '')) if total_items_match else 0
+                pages_to_scrape = math.ceil(total_items / 60)
+                if max_pages_per_brand != 0:
+                    pages_to_scrape = min(max_pages_per_brand, pages_to_scrape)
+                # 1ページ目
+                products_page1 = parse_page_data(soup)
+                if products_page1:
+                    for p in products_page1:
+                        p['brand'] = brand['name']
+                    all_products.extend(products_page1)
+                # 2ページ目以降
+                for page_num in range(2, pages_to_scrape + 1):
+                    human_like_delay(2, 5)
+                    page_url = f"{base_url}?page={page_num}"
+                    print(f"{brand['name']} {page_num}ページ目を取得中...")
+                    page.goto(page_url, wait_until='domcontentloaded', timeout=60000)
+                    page.wait_for_selector(main_content_selector, state='visible', timeout=20000)
+                    html_content = page.content()
+                    soup = BeautifulSoup(html_content, 'html.parser')
+                    products_on_page = parse_page_data(soup)
+                    if products_on_page:
+                        for p in products_on_page:
+                            p['brand'] = brand['name']
+                        all_products.extend(products_on_page)
+                    else:
+                        break
+            except Exception as e:
+                print(f"{brand['name']} のスクレイピング中にエラー: {e}")
+                continue
+        browser.close()
+        return all_products
+
+# --- main関数で全ブランド取得を呼び出せるように ---
 def main():
-    """このスクリプトを単体で実行するためのメイン関数"""
-    print("--- Chrono24の単体スクレイピングを開始します ---")
-    scraped_products = scrape_chrono24_submariner(max_pages=1) # 単体テスト時は1ページのみ
+    print("--- Chrono24全ブランド・全モデルのスクレイピングを開始します ---")
+    scraped_products = scrape_chrono24_all_brands(max_pages_per_brand=1)  # テスト時は1ページのみ
     if scraped_products:
-        output_filename = "chrono24_scraped_data.json"
+        output_filename = "chrono24_allbrands_scraped_data.json"
         try:
             with open(output_filename, 'w', encoding='utf-8') as f:
                 json.dump(scraped_products, f, ensure_ascii=False, indent=2)

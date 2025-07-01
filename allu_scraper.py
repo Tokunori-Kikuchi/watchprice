@@ -49,7 +49,7 @@ def parse_allu_page(soup):
 def scrape_allu(search_query="ロレックス サブマリーナ", max_pages=2):
     """
     メニューを辿ってブランドページにアクセスし、在庫フィルタを適用します。
-    ROLEXリンクのセレクタをより具体的に修正。
+    Inspectorで取得したセレクタでロレックスリンクをクリック。
     """
     all_products = []
 
@@ -63,28 +63,22 @@ def scrape_allu(search_query="ロレックス サブマリーナ", max_pages=2):
         page = context.new_page()
 
         try:
-            base_url = "https://allu-official.com/jp/ja/"
-            print(f"ALLUトップページにアクセス中: {base_url}")
-            page.goto(base_url, wait_until='networkidle', timeout=60000)
+            # ブランド一覧ページを直接開く
+            market_url = "https://allu-official.com/jp/ja/market/"
+            print(f"ALLUブランド一覧ページにアクセス中: {market_url}")
+            page.goto(market_url, wait_until='networkidle', timeout=60000)
 
-            brand_menu_selector = 'a:has-text("BRAND")'
-            print("「BRAND」メニューをクリックしています...")
-            page.wait_for_selector(brand_menu_selector, state='visible', timeout=15000)
+            # ロレックスリンクをInspectorで取得したセレクタでクリック
+            print("ブランド一覧から『ロレックス』リンクをクリックしています...")
+            page.wait_for_selector('a', state='visible', timeout=15000)  # リンクが出るまで待つ
             with page.expect_navigation(wait_until='domcontentloaded', timeout=60000):
-                page.locator(brand_menu_selector).first.click()
-
-            # ブランド一覧のコンテナ内にあるROLEXリンクに限定する
-            rolex_link_selector = 'div.css-1m9r7lj a:has-text("ROLEX")'
-            print(f"ブランド一覧から「ROLEX」({rolex_link_selector})をクリックしています...")
-            page.wait_for_selector(rolex_link_selector, state='visible', timeout=15000)
-            with page.expect_navigation(wait_until='domcontentloaded', timeout=60000):
-                page.locator(rolex_link_selector).first.click()
+                page.get_by_role("link", name="ロレックス").first.click()
 
             print("ロレックス商品一覧ページに遷移しました。")
 
             # 在庫ありフィルターを適用
             in_stock_button_selector = 'a:has-text("在庫あり")'
-            print("「在庫あり」フィルターをクリックしています...")
+            print("『在庫あり』フィルターをクリックしています...")
             page.wait_for_selector(in_stock_button_selector, state='visible', timeout=15000)
             with page.expect_navigation(wait_until='domcontentloaded', timeout=60000):
                 page.click(in_stock_button_selector)
@@ -148,6 +142,22 @@ def main():
             print(f"\n❌ ファイル出力中にエラーが発生しました: {e}")
     else:
         print("商品情報の取得に失敗しました。")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        context = browser.new_context()
+        page = context.new_page()
+
+        # 1. ALLUのトップページへアクセス
+        page.goto("https://allu-official.com/jp/ja/market/")
+
+        # 2. ここに必要な操作（例：メニュークリック等）を記述
+        # 例: page.click("text=BRAND") など
+
+        # 3. ブランド一覧ページに遷移した直後にデバッグポイントを挿入
+        page.pause()  # ← ここでPlaywright Inspectorが起動し、処理が一時停止します
+
+        # 4. 以降の操作はInspectorでセレクタを特定後に記述
 
 if __name__ == "__main__":
     main()

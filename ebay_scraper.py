@@ -13,6 +13,20 @@ STEALTH_JS_PATH = os.path.join(SCRIPT_DIR, 'stealth.min.js')
 # --- ▼▼▼ 未定義だった定数を追加 ▼▼▼ ---
 USER_DATA_DIR = os.path.join(SCRIPT_DIR, "ebay_browser_profile")
 
+# --- 優先ブランドリスト ---
+PRIORITY_BRANDS = [
+    "ロレックス", "ROLEX",
+    "チューダー", "チュードル", "TUDOR",
+    "オメガ", "OMEGA",
+    "パテックフィリップ", "PATEK PHILIPPE",
+    "オーデマピゲ", "AUDEMARS PIGUET",
+    "グランドセイコー", "GRAND SEIKO",
+    "カルティエ", "CARTIER",
+    "パネライ", "PANERAI",
+    "アイダブリューシー", "IWC",
+    "ヴァシュロン・コンスタンタン", "VACHERON CONSTANTIN"
+]
+
 def save_cookies(context, path):
     try:
         with open(path, 'w') as f:
@@ -62,6 +76,9 @@ def parse_ebay_page(soup):
         })
     return products
 
+def calc_json_bytes(data):
+    return len(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
 def scrape_ebay(search_query="rolex submariner", max_pages=2):
     all_products = []
     if not os.path.exists(STEALTH_JS_PATH):
@@ -110,6 +127,21 @@ def scrape_ebay(search_query="rolex submariner", max_pages=2):
             page.screenshot(path='ebay_error_screenshot.png')
             context.close()
             return None
+
+def scrape_ebay_priority_brands(max_pages=2, max_total_bytes=4_500_000_000, already_bytes=0):
+    all_products = []
+    total_bytes = already_bytes
+    for brand in PRIORITY_BRANDS:
+        if total_bytes >= max_total_bytes:
+            print("容量上限に達したためeBayの取得を停止します。")
+            break
+        print(f"\n--- eBayブランド検索: {brand} ---")
+        products = scrape_ebay(search_query=brand, max_pages=max_pages)
+        if products:
+            all_products.extend(products)
+            total_bytes += calc_json_bytes(products)
+            print(f"eBay: {brand} で {len(products)}件取得、累計 {total_bytes/1_000_000:.2f}MB")
+    return all_products
 
 def main():
     """このスクリプトを単体で実行するためのメイン関数"""

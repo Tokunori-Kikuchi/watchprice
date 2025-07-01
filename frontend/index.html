@@ -1,27 +1,240 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>腕時計価格調査ツール</title>
-    <link rel="stylesheet" href="./css/style.css">
-</head>
-<body>
-    <header class="site-header">
-        <h1>腕時計価格調査ツール</h1>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <header class="site-header luxury-header">
+      <div class="logo-title">
+        <!-- 王冠SVGロゴ -->
+        <svg
+          class="crown-logo"
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="24"
+            cy="24"
+            r="23"
+            stroke="#D4AF37"
+            stroke-width="2"
+            fill="#1E362D"
+          />
+          <path
+            d="M8 32L14 18L24 32L34 18L40 32"
+            stroke="#D4AF37"
+            stroke-width="2"
+            fill="none"
+          />
+          <circle cx="14" cy="16" r="2" fill="#D4AF37" />
+          <circle cx="24" cy="30" r="2" fill="#D4AF37" />
+          <circle cx="34" cy="16" r="2" fill="#D4AF37" />
+        </svg>
+        <div>
+          <h1>腕時計価格調査ツール</h1>
+          <p class="catch-copy">時を超える価値を、あなたの手に。</p>
+        </div>
+      </div>
     </header>
 
-    <div class="search-container">
+    <section class="hero-section luxury-hero">
+      <div class="hero-content">
+        <h2>世界の名門ブランドから、選び抜かれた腕時計を。</h2>
+        <p class="sub-message">
+          価格の推移も、希少なモデルも、すべてこの場所で。
+        </p>
+      </div>
+    </section>
+
+    <!-- 検索条件表示ボタン -->
+    <div class="filter-toggle-bar">
+      <button id="show-filter-btn" class="luxury-btn">検索条件を表示</button>
+    </div>
+
+    <!-- 検索・絞り込みパネル（初期非表示） -->
+    <div id="filter-panel" class="filter-panel" style="display: none">
+      <button id="close-filter-btn" class="luxury-btn close-btn">
+        × 閉じる
+      </button>
+      <div class="luxury-filter-bar">
+        <div class="filter-group">
+          <label>ブランド</label>
+          <div class="brand-checkboxes">
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="ロレックス"
+              />ロレックス / ROLEX</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="チューダー"
+              />チューダー / TUDOR</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="オメガ"
+              />オメガ / OMEGA</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="パテックフィリップ"
+              />パテックフィリップ / PATEK PHILIPPE</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="オーデマピゲ"
+              />オーデマピゲ / AUDEMARS PIGUET</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="グランドセイコー"
+              />グランドセイコー / GRAND SEIKO</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="カルティエ"
+              />カルティエ / CARTIER</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="パネライ"
+              />パネライ / PANERAI</label
+            >
+            <label
+              ><input type="checkbox" class="brand-checkbox" value="IWC" />IWC /
+              アイダブリューシー</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                class="brand-checkbox"
+                value="ヴァシュロン・コンスタンタン"
+              />ヴァシュロン・コンスタンタン / VACHERON CONSTANTIN</label
+            >
+          </div>
+        </div>
+        <div class="slider-group">
+          <label>価格帯</label>
+          <div class="range-pair">
+            <label for="price-range-min" class="visually-hidden"
+              >価格下限</label
+            >
+            <input
+              type="range"
+              id="price-range-min"
+              min="0"
+              max="10000000"
+              step="10000"
+            />
+            <span id="price-range-min-value">0円</span>
+            <span>〜</span>
+            <label for="price-range-max" class="visually-hidden"
+              >価格上限</label
+            >
+            <input
+              type="range"
+              id="price-range-max"
+              min="0"
+              max="10000000"
+              step="10000"
+            />
+            <span id="price-range-max-value">10,000,000円</span>
+          </div>
+        </div>
+        <div class="slider-group">
+          <label>年代</label>
+          <div class="range-pair">
+            <label for="year-range-min" class="visually-hidden">年代下限</label>
+            <input
+              type="range"
+              id="year-range-min"
+              min="1950"
+              max="2024"
+              step="1"
+            />
+            <span id="year-range-min-value">1950年</span>
+            <span>〜</span>
+            <label for="year-range-max" class="visually-hidden">年代上限</label>
+            <input
+              type="range"
+              id="year-range-max"
+              min="1950"
+              max="2024"
+              step="1"
+            />
+            <span id="year-range-max-value">2024年</span>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="sort-select">並び替え</label>
+          <select id="sort-select">
+            <option value="newest">新しい順</option>
+            <option value="oldest">古い順</option>
+            <option value="lowprice">安い順</option>
+            <option value="highprice">高い順</option>
+          </select>
+        </div>
+      </div>
+      <div class="export-bar">
+        <button id="export-csv-btn" class="luxury-btn">CSVダウンロード</button>
+      </div>
+      <div class="search-container">
         <form id="search-form">
-            <input type="text" id="search-input" placeholder="ブランドやモデル名で検索...">
-            <button type="submit">検索</button>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="ブランドやモデル名で検索..."
+          />
+          <button type="submit">検索</button>
         </form>
+      </div>
+    </div>
+
+    <!-- グラフ表示トグルボタン -->
+    <div class="chart-toggle-bar">
+      <button id="show-chart-btn" class="luxury-btn">グラフを表示</button>
+    </div>
+
+    <!-- --- グラフ表示エリア --- -->
+    <div id="chart-area" style="display: none">
+      <div class="chart-tabs">
+        <button id="tab-brand" class="chart-tab active">ブランド別</button>
+        <button id="tab-model" class="chart-tab">モデル別</button>
+        <button id="tab-hist" class="chart-tab">価格帯分布</button>
+        <button id="tab-rank" class="chart-tab">ランキング</button>
+      </div>
+      <button id="close-chart-btn" class="luxury-btn close-btn">
+        × 閉じる
+      </button>
     </div>
 
     <main id="root" class="card-container">
-        <!-- 検索結果はここに表示されます -->
+      <!-- 検索結果はここに表示されます -->
     </main>
 
-    <script src="./js/app.js"></script>
-</body>
+    <script src="./js/app.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  </body>
 </html>

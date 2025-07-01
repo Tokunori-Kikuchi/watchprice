@@ -9,6 +9,20 @@ import random
 # --- 定数とヘルパー関数 ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# --- 優先ブランドリスト ---
+PRIORITY_BRANDS = [
+    "ロレックス", "ROLEX",
+    "チューダー", "チュードル", "TUDOR",
+    "オメガ", "OMEGA",
+    "パテックフィリップ", "PATEK PHILIPPE",
+    "オーデマピゲ", "AUDEMARS PIGUET",
+    "グランドセイコー", "GRAND SEIKO",
+    "カルティエ", "CARTIER",
+    "パネライ", "PANERAI",
+    "アイダブリューシー", "IWC",
+    "ヴァシュロン・コンスタンタン", "VACHERON CONSTANTIN"
+]
+
 def human_like_delay(min_sec=1.5, max_sec=4.0):
     """人間らしいランダムな待機時間を生成する"""
     time.sleep(random.uniform(min_sec, max_sec))
@@ -125,6 +139,24 @@ def scrape_tokemar(search_query="ロレックス サブマリーナ", max_pages=
             page.screenshot(path='tokemar_error_screenshot.png')
             browser.close()
             return None
+
+def calc_json_bytes(data):
+    return len(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
+def scrape_tokemar_priority_brands(max_pages=2, max_total_bytes=4_500_000_000, already_bytes=0):
+    all_products = []
+    total_bytes = already_bytes
+    for brand in PRIORITY_BRANDS:
+        if total_bytes >= max_total_bytes:
+            print("容量上限に達したためトケマーの取得を停止します。")
+            break
+        print(f"\n--- トケマーブランド検索: {brand} ---")
+        products = scrape_tokemar(search_query=brand, max_pages=max_pages)
+        if products:
+            all_products.extend(products)
+            total_bytes += calc_json_bytes(products)
+            print(f"トケマー: {brand} で {len(products)}件取得、累計 {total_bytes/1_000_000:.2f}MB")
+    return all_products
 
 def main():
     """このスクリプトを単体で実行するためのメイン関数"""
